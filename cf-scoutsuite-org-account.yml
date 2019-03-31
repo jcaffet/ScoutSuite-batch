@@ -1,0 +1,34 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stack providing cross account access for ScoutSuite
+
+Parameters:
+
+  ScoutSuiteAccount:
+    Description: AWS account ID where ScoutSuite is installed
+    Type: String
+    ConstraintDescription: Must be a valid AWS account ID
+
+Resources:
+
+  ScoutSuiteScanRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: scoutsuite-organizations-role
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS: !Sub 'arn:aws:iam::${ScoutSuiteAccount}:root'
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: "AllowOrganizationListAccounts"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action: organizations:ListAccounts
+            Resource: '*'
+

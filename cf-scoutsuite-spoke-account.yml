@@ -1,0 +1,39 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stack providing cross account access for ScoutSuite
+# Suggested StackName : scoutsuite-spoke-account
+
+Parameters:
+
+  ScoutSuiteCentralAccount:
+    Description: AWS account ID where ScoutSuite is installed
+    Type: String
+    ConstraintDescription: Must be a valid AWS account ID
+
+Resources:
+
+  ScoutSuiteScanAssumeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: scoutsuite-scan-role
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS: !Sub 'arn:aws:iam::${ScoutSuiteCentralAccount}:root'
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecurityAudit
+      Path: "/"
+      Policies:
+      - PolicyName: additionalScoutSuitePolicies
+        PolicyDocument:
+          Statement:
+          - Effect: "Allow"
+            Action:
+            - "support:DescribeTrustedAdvisorChecks"
+            Resource:
+            - "*"
+

@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Common resources for ScoutSuite Batch
+# Stack Name : scoutsuite-common
+# Description : this stack creates the ScoutSuite main stack prerequisites :
+# - one ECR repository
+# - one S3 bucket
+
+
+Parameters:
+
+  TagBlock:
+    Description: Applicative block tag
+    Type: String
+
+  TagApp:
+    Description: Application referenced by this stack
+    Type: String
+
+  TagOrg:
+    Description: Organization Unit
+    Type: String
+
+  ScoutSuiteEcrRepoName:
+    Description: ECR name for the ScoutSuite repo
+    Type: String
+
+
+Resources:
+
+  ScoutSuiteEcrRepository:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: !Sub '${ScoutSuiteEcrRepoName}'
+
+  ScoutSuiteS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${TagApp}-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
+      Tags:
+      - Key: Block
+        Value: !Sub '${TagBlock}'
+      - Key: App
+        Value: !Sub '${TagApp}'
+      - Key: Org
+        Value: !Sub '${TagOrg}'
+
+Outputs:
+
+  ScoutSuiteEcrRepository:
+    Description: ScoutSuite ECR repository
+    Value: !GetAtt ScoutSuiteEcrRepository.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-EcrRepository"
+
+  ScoutSuiteS3Bucket:
+    Description: ScoutSuite S3 bucket
+    Value: !GetAtt ScoutSuiteS3Bucket.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-S3Bucket"
+
