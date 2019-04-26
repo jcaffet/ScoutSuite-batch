@@ -22,8 +22,7 @@ echo "Generating HTML Account audit ..."
 python Scout.py aws
 
 echo "Saving the report files in s3://${SCOUTSUITE_BUCKET}/reports/${ACCOUNT}"
-now=`date +'%Y-%m-%d'`
-report_file_prefix=${ACCOUNT}-${now}
+report_file_prefix=${ACCOUNT}
 mv scoutsuite-report ${report_file_prefix}-scoutsuite-report
 zip -qr ${report_file_prefix}-scoutsuite-report.zip ${report_file_prefix}-scoutsuite-report
 unset AWS_SECRET_ACCESS_KEY
