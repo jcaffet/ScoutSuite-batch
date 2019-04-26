@@ -26,14 +26,6 @@ Resources:
           - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
+        - arn:aws:iam::aws:policy/ReadOnlyAccess
       Path: "/"
-      Policies:
-      - PolicyName: additionalScoutSuitePolicies
-        PolicyDocument:
-          Statement:
-          - Effect: "Allow"
-            Action:
-            - "support:DescribeTrustedAdvisorChecks"
-            Resource:
-            - "*"
 
