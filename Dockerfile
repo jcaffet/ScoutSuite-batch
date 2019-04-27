@@ -1,11 +1,13 @@
 FROM amazonlinux:latest
-RUN yum -y install aws-cli jq tar gzip python-pip zip unzip
 
-RUN pip install scoutsuite
-ADD ./ScoutSuite /ScoutSuite
-ADD docker-entrypoint.sh /ScoutSuite/docker-entrypoint.sh
-RUN chmod 744 /ScoutSuite/docker-entrypoint.sh
+RUN yum -y update \
+ && yum -y install aws-cli jq tar gzip python3 python3-pip zip unzip gcc python3-devel \
+ && yum clean all
 
 WORKDIR /ScoutSuite
-ENTRYPOINT ["/ScoutSuite/docker-entrypoint.sh"]
 
+RUN pip3 install scoutsuite
+
+ADD docker-entrypoint.sh /ScoutSuite/docker-entrypoint.sh
+RUN chmod 744 /ScoutSuite/docker-entrypoint.sh
+ENTRYPOINT ["/ScoutSuite/docker-entrypoint.sh"]
