@@ -10,6 +10,10 @@ Parameters:
     Type: String
     ConstraintDescription: Must be a valid AWS account ID
 
+  ScoutSuiteRoleExternalId:
+    Description: CloudSploit Role ExternalID
+    Type: String
+
 Resources:
 
   ScoutSuiteScanAssumeRole:
@@ -24,8 +28,10 @@ Resources:
             AWS: !Sub 'arn:aws:iam::${ScoutSuiteCentralAccount}:root'
           Action:
           - sts:AssumeRole
+          Condition:
+            StringEquals:
+              "sts:ExternalId": !Sub '${ScoutSuiteRoleExternalId}'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
         - arn:aws:iam::aws:policy/ReadOnlyAccess
       Path: "/"
-

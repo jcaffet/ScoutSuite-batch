@@ -4,6 +4,7 @@ TMP_ASSUME_ROLE_FILE=/tmp/assume-role.json
 
 echo "Collecting credentials for ${ACCOUNT} for role ${SCOUTSUITE_SCAN_ROLE}"
 aws sts assume-role --role-arn arn:aws:iam::${ACCOUNT}:role/${SCOUTSUITE_SCAN_ROLE} \
+										--external-id ${SCOUTSUITE_ROLE_EXTERNALID} \
                     --role-session-name ${SCOUTSUITE_SCAN_ROLE} \
                     >${TMP_ASSUME_ROLE_FILE}
 
