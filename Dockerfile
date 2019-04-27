@@ -6,7 +6,7 @@ RUN yum -y update \
 
 WORKDIR /ScoutSuite
 
-RUN pip3 install scoutsuite
+RUN pip3 install scoutsuite==4.3.0
 
 ADD docker-entrypoint.sh /ScoutSuite/docker-entrypoint.sh
 RUN chmod 744 /ScoutSuite/docker-entrypoint.sh
