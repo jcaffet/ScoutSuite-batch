@@ -28,5 +28,4 @@ unset AWS_SECRET_ACCESS_KEY
 unset AWS_ACCESS_KEY_ID
 unset AWS_SESSION_TOKEN
 aws s3 cp ${report_file_prefix}-scoutsuite-report.zip \
-          s3://${SCOUTSUITE_BUCKET}/reports/${ACCOUNT}/ \
-          --storage-class ONEZONE_IA
+          s3://${SCOUTSUITE_BUCKET}/reports/${ACCOUNT}/
