@@ -5,9 +5,13 @@ Description: Stack providing cross account access for ScoutSuite
 Parameters:
 
   ScoutSuiteAccount:
-    Description: AWS account ID where ScoutSuite is installed
+    Description: ScoutSuite AWS accountId
     Type: String
     ConstraintDescription: Must be a valid AWS account ID
+
+  ScoutSuiteRoleExternalId:
+    Description: ScoutSuite Role ExternalID
+    Type: String
 
 Resources:
 
@@ -23,6 +27,9 @@ Resources:
             AWS: !Sub 'arn:aws:iam::${ScoutSuiteAccount}:root'
           Action:
           - sts:AssumeRole
+          Condition:
+            StringEquals:
+              "sts:ExternalId": !Sub '${ScoutSuiteRoleExternalId}'
       Policies:
       - PolicyName: "AllowOrganizationListAccounts"
         PolicyDocument:
@@ -31,4 +38,3 @@ Resources:
           - Effect: "Allow"
             Action: organizations:ListAccounts
             Resource: '*'
-
