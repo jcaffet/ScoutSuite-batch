@@ -17,7 +17,7 @@ It simply industrializes the deletion process thanks to the following AWS resour
 - ECR to host the Docker image that embeds ScoutSuite
 - Lambda to gather the accounts to perform and submit the jobs
 - S3 to store generated reports
-- Cloudwatch Logs to log the global activity
+- CloudWatch Logs to log the global activity
 
 ![ScoutSuite Batch Diagram](images/scoutsuitebatch-diagram.png)
 
@@ -29,12 +29,12 @@ ScoutSuite needs :
 
 ## Installation
 
-1. deploy the cf-scoutsuite-common.yml CloudFormation stack in the central account
-2. Git clone scoutsuite scans into this directory
+1. deploy the [cf-scoutsuite-common.yml](cf-scoutsuite-common.yml) CloudFormation stack in the central account
+2. Git clone scoutsuite scans repository into this directory
 3. Build, tag and push the Docker image. Follow the information provided in the ECR repository page.
-4. deploy the cf-scoutsuite-org-account.yml in the account using AWS Organizations
-5. deploy the cf-scoutsuite-spoke-account.yml in all the accounts using to scan. To make it easy, use StackSets Stacks from the Organizations level.
-6. deploy the cf-scoutsuite-batch.yml CloudFormation stack in the central account
+4. deploy the [cf-scoutsuite-org-account.yml](cf-scoutsuite-org-account.yml) in the account using AWS Organizations
+5. deploy the [cf-scoutsuite-spoke-account.yml](cf-scoutsuite-spoke-account.yml) in all the accounts using to scan. To make it easy, use StackSets Stacks from the Organizations level.
+6. deploy the [cf-scoutsuite-batch.yml](cf-scoutsuite-batch.yml) CloudFormation stack in the central account
 
 Do not forget two different strong ExternalIds like UUID (one for Organizations role, one for scan role)
 

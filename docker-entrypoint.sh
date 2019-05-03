@@ -2,7 +2,12 @@
 
 TMP_ASSUME_ROLE_FILE=/tmp/assume-role.json
 
-echo "Collecting credentials for ${ACCOUNT} for role ${SCOUTSUITE_SCAN_ROLE}"
+if [ -z "${ACCOUNT}" ]; then echo "ACCOUNT not set !"; exit 1; fi
+if [ -z "${REPORTING_BUCKET}" ]; then echo "REPORTING_BUCKET not set !"; exit 1; fi
+if [ -z "${SCOUTSUITE_SCAN_ROLE}" ]; then echo "SCOUTSUITE_SCAN_ROLE not set !"; exit 1; fi
+if [ -z "${SCOUTSUITE_ROLE_EXTERNALID}" ]; then echo "SCOUTSUITE_ROLE_EXTERNALID not set !"; exit 1; fi
+
+echo "Collecting credentials for ${ACCOUNT} with role ${SCOUTSUITE_SCAN_ROLE}"
 aws sts assume-role --role-arn arn:aws:iam::${ACCOUNT}:role/${SCOUTSUITE_SCAN_ROLE} \
 										--external-id ${SCOUTSUITE_ROLE_EXTERNALID} \
                     --role-session-name ${SCOUTSUITE_SCAN_ROLE} \
@@ -20,12 +25,12 @@ if [ -z "${AWS_SESSION_TOKEN}" ]; then echo "AWS_SESSION_TOKEN not set !"; exit 
 echo "Generating HTML Account audit ..."
 Scout aws
 
-echo "Saving the report files in s3://${SCOUTSUITE_BUCKET}/reports/${ACCOUNT}"
-report_file_prefix=${ACCOUNT}
-mv scoutsuite-report ${report_file_prefix}-scoutsuite-report
-zip -qr ${report_file_prefix}-scoutsuite-report.zip ${report_file_prefix}-scoutsuite-report
+echo "Saving the report files in s3://${REPORTING_BUCKET}/${ACCOUNT}"
+report_file_prefix=${ACCOUNT}-scoutsuite
+mv scoutsuite-report ${report_file_prefix}-report
+zip -qr ${report_file_prefix}-report.zip ${report_file_prefix}-report
 unset AWS_SECRET_ACCESS_KEY
 unset AWS_ACCESS_KEY_ID
 unset AWS_SESSION_TOKEN
-aws s3 cp ${report_file_prefix}-scoutsuite-report.zip \
-          s3://${SCOUTSUITE_BUCKET}/reports/${ACCOUNT}/
+aws s3 cp ${report_file_prefix}-report.zip \
+          s3://${REPORTING_BUCKET}/${ACCOUNT}/

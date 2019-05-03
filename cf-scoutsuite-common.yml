@@ -3,37 +3,51 @@ Description: Common resources for ScoutSuite Batch
 # Stack Name : scoutsuite-common
 # Description : this stack creates the ScoutSuite main stack prerequisites :
 # - one ECR repository
-# - one S3 bucket
+# - if needed, one S3 bucket to store reports (otherwise use an external one)
 
 
 Parameters:
 
   TagBlock:
-    Description: Applicative block tag
+    Description: Block tag
     Type: String
+    Default: security
 
   TagApp:
-    Description: Application referenced by this stack
+    Description: Application tag
     Type: String
+    Default: scoutsuite
 
   TagOrg:
     Description: Organization Unit
     Type: String
+    Default: cloudteam
 
   ScoutSuiteEcrRepoName:
     Description: ECR name for the ScoutSuite repo
     Type: String
+    Default: prowler
+
+  UseOwnReportingBucket:
+    Description: Enable a dedicated Bucket to store reports
+    Type: String
+    Default: true
+    AllowedValues: [true, false]
+
+Conditions:
+  HasOwnReportingBucket: !Equals [!Ref UseOwnReportingBucket, true]
 
 
 Resources:
 
   ScoutSuiteEcrRepository:
     Type: AWS::ECR::Repository
-    Properties: 
+    Properties:
       RepositoryName: !Sub '${ScoutSuiteEcrRepoName}'
 
   ScoutSuiteS3Bucket:
     Type: AWS::S3::Bucket
+    Condition: HasOwnReportingBucket
     Properties:
       BucketName: !Sub '${TagApp}-${AWS::AccountId}'
       BucketEncryption:
@@ -55,10 +69,3 @@ Outputs:
     Value: !GetAtt ScoutSuiteEcrRepository.Arn
     Export:
       Name: !Sub "${AWS::StackName}-EcrRepository"
-
-  ScoutSuiteS3Bucket:
-    Description: ScoutSuite S3 bucket
-    Value: !GetAtt ScoutSuiteS3Bucket.Arn
-    Export:
-      Name: !Sub "${AWS::StackName}-S3Bucket"
-

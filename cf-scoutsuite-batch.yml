@@ -81,7 +81,7 @@ Parameters:
     Type: String
     Default: scoutsuite-scan-role
 
-  ScoutSuiteRoleExternalId:
+  ScoutSuiteScanRoleExternalId:
     Description: Scan Role ExternalID
     Type: String
 
@@ -98,7 +98,7 @@ Parameters:
     Description: AWS accountId uisng Organizations
     Type: String
 
-  ScoutSuiteBucket:
+  ScoutSuiteReportingBucket:
     Description: S3 bucket for ScoutSuite assets
     Type: String
 
@@ -217,8 +217,12 @@ Resources:
         Vcpus: 1
         Image: !Ref ScoutSuiteEcrImage
         Environment:
-          - Name: SCOUTSUITE_BUCKET
-            Value: !Ref ScoutSuiteBucket
+        - Name: REPORTING_BUCKET
+          Value: !Ref ScoutSuiteReportingBucket
+        - Name: SCOUTSUITE_SCAN_ROLE
+          Value: !Ref ScoutSuiteScanRole
+        - Name: SCOUTSUITE_ROLE_EXTERNALID
+          Value: !Ref ScoutSuiteScanRoleExternalId
       RetryStrategy:
         Attempts: 1
 
@@ -253,7 +257,7 @@ Resources:
             Action:
             - "s3:PutObject"
             Resource:
-            - !Sub "arn:aws:s3:::${ScoutSuiteBucket}/reports/*"
+            - !Sub "arn:aws:s3:::${ScoutSuiteReportingBucket}/*"
 
   ScoutSuiteScheduledRule:
     Type: AWS::Events::Rule
@@ -294,14 +298,6 @@ Resources:
             - "sts:AssumeRole"
             Resource:
             - !Sub "arn:aws:iam::*:role/${ScoutSuiteOrganizationsRole}"
-      - PolicyName: accessConfigBucketPolicy
-        PolicyDocument:
-          Statement:
-          - Effect: "Allow"
-            Action:
-            - "s3:GetObject"
-            Resource:
-            - !Sub "arn:aws:s3:::${ScoutSuiteBucket}/config/accounts.list"
       - PolicyName: launch-jobs-allow
         PolicyDocument:
           Statement:
@@ -338,8 +334,6 @@ Resources:
                   import json
                   import boto3
                   def lambda_handler(event, context):
-                    SCOUTSUITE_SCAN_ROLE = os.environ['SCOUTSUITE_SCAN_ROLE']
-                    SCOUTSUITE_ROLE_EXTERNALID = os.environ['SCOUTSUITE_ROLE_EXTERNALID']
                     ORGANIZATIONS_ROLE = os.environ['ORGANIZATIONS_ROLE']
                     ORGANIZATIONS_ROLE_EXTERNALID = os.environ['ORGANIZATIONS_ROLE_EXTERNALID']
                     ORGANIZATIONS_ACCOUNT = os.environ['ORGANIZATIONS_ACCOUNT']
@@ -359,18 +353,10 @@ Resources:
                               'name': 'ACCOUNT',
                               'value': accountId
                             },
-                            {
-                              'name': 'SCOUTSUITE_SCAN_ROLE',
-                              'value': SCOUTSUITE_SCAN_ROLE
-                            },
-                            {
-                              'name': 'SCOUTSUITE_ROLE_EXTERNALID',
-                              'value': SCOUTSUITE_ROLE_EXTERNALID
-                            },
                           ]
                         }
                       )
-                      print("Job %s launched with jobId %s to scan account %s with role %s" % (response['jobName'], response['jobId'], accountId, SCOUTSUITE_SCAN_ROLE))
+                      print("Job %s launched with jobId %s to scan account %s" % (response['jobName'], response['jobId'], accountId))
 
                   def get_session(account=None, role=None, externalId=None, region=None, session_name='my_session'):
                       # If the role is given : assumes a role and returns boto3 session
@@ -400,29 +386,13 @@ Resources:
                               if account['Status'] == "ACTIVE":
                                 activeAccountIds.append(account[ "Id" ])
                       return activeAccountIds
-
-                  def retreiveAccountList():
-                    CONFIGFILE_BUCKET = os.environ['CONFIGFILE_BUCKET']
-                    CONFIGFILE_NAME = os.environ['CONFIGFILE_NAME']
-                    tempFile = '/tmp/accounts.list'
-                    accountList=[]
-
-                    s3client = boto3.client('s3')
-                    s3client.download_file(CONFIGFILE_BUCKET, CONFIGFILE_NAME, tempFile)
-                    for line in open(tempFile):
-                      li=line.strip()
-                      if not li.startswith("#"):
-                        accountList.append(line.rstrip())
-                    return accountList
       Environment:
         Variables:
           JOBNAME: "scoutsuite-job"
           JOBQUEUE: !Ref ScoutSuiteJobQueue
           JOBDEFINITION: !Ref ScoutSuiteJobDefinition
-          CONFIGFILE_BUCKET: !Ref ScoutSuiteBucket
-          CONFIGFILE_NAME: "config/accounts.list"
           SCOUTSUITE_SCAN_ROLE: !Ref ScoutSuiteScanRole
-          SCOUTSUITE_ROLE_EXTERNALID: !Ref ScoutSuiteRoleExternalId
+          SCOUTSUITE_ROLE_EXTERNALID: !Ref ScoutSuiteScanRoleExternalId
           ORGANIZATIONS_ROLE: !Ref ScoutSuiteOrganizationsRole
           ORGANIZATIONS_ROLE_EXTERNALID: !Ref ScoutSuiteOrganizationsRoleExternalId
           ORGANIZATIONS_ACCOUNT: !Ref ScoutSuiteOrganizationsAccount
