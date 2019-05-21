@@ -16,7 +16,7 @@ Metadata:
         Parameters: ['ComputeEnvMinCpu', 'ComputeEnvDesiredCpu', 'ComputeEnvMaxCpu']
       - Label:
           default: 'Access to the AWS Organizations account'
-        Parameters: ['ScoutSuiteOrganizationsAccount', 'ScoutSuiteOrganizationsRole', 'ScoutSuiteOrganizationsRoleExternalId']
+        Parameters: ['OrganizationAccount', 'OrganizationRole', 'OrganizationRoleExternalId']
       - Label:
           default: 'Access to the spoke accounts'
         Parameters: ['ScoutSuiteScanRole', 'ScoutSuiteScanRoleExternalId']
@@ -85,16 +85,16 @@ Parameters:
     Description: Scan Role ExternalID
     Type: String
 
-  ScoutSuiteOrganizationsRole:
+  OrganizationRole:
     Description: IAM role to assume on the Organizations account to ScoutSuite
     Type: String
     Default: scoutsuite-organizations-role
 
-  ScoutSuiteOrganizationsRoleExternalId:
+  OrganizationRoleExternalId:
     Description: ExternalId of role on the Organizations account for ScoutSuite
     Type: String
 
-  ScoutSuiteOrganizationsAccount:
+  OrganizationAccount:
     Description: AWS accountId uisng Organizations
     Type: String
 
@@ -275,7 +275,7 @@ Resources:
       FunctionName: !Ref ScoutSuiteJobLauncherLambda
       Action: "lambda:InvokeFunction"
       Principal: "events.amazonaws.com"
-      SourceArn: !Sub ${ScoutSuiteScheduledRule.Arn}
+      SourceArn: !GetAtt ScoutSuiteScheduledRule.Arn
 
   ScoutSuiteJobLauncherLambdaRole:
     Type: AWS::IAM::Role
@@ -297,7 +297,7 @@ Resources:
             Action:
             - "sts:AssumeRole"
             Resource:
-            - !Sub "arn:aws:iam::*:role/${ScoutSuiteOrganizationsRole}"
+            - !Sub "arn:aws:iam::${OrganizationAccount}:role/${OrganizationRole}"
       - PolicyName: launch-jobs-allow
         PolicyDocument:
           Statement:
@@ -319,13 +319,13 @@ Resources:
   ScoutSuiteLambdaLogGroup:
     Type: "AWS::Logs::LogGroup"
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${TagBlock}-${TagApp}'
+      LogGroupName: !Sub '/aws/lambda/${ScoutSuiteJobLauncherLambda}'
       RetentionInDays: 30
 
   ScoutSuiteJobLauncherLambda:
     Type: "AWS::Lambda::Function"
     Properties:
-      FunctionName: !Sub '${TagBlock}-${TagApp}'
+      FunctionName: !Sub '${TagApp}-launcher'
       Description: "Launch ScoutSuite scan jobs"
       Handler: "index.lambda_handler"
       Code:
@@ -334,10 +334,10 @@ Resources:
                   import json
                   import boto3
                   def lambda_handler(event, context):
-                    ORGANIZATIONS_ROLE = os.environ['ORGANIZATIONS_ROLE']
-                    ORGANIZATIONS_ROLE_EXTERNALID = os.environ['ORGANIZATIONS_ROLE_EXTERNALID']
-                    ORGANIZATIONS_ACCOUNT = os.environ['ORGANIZATIONS_ACCOUNT']
-                    session = get_session(account=ORGANIZATIONS_ACCOUNT, role=ORGANIZATIONS_ROLE, externalId=ORGANIZATIONS_ROLE_EXTERNALID, session_name='scoutsuite_lambda')
+                    ORGANIZATION_ROLE = os.environ['ORGANIZATION_ROLE']
+                    ORGANIZATION_ROLE_EXTERNALID = os.environ['ORGANIZATION_ROLE_EXTERNALID']
+                    ORGANIZATION_ACCOUNT = os.environ['ORGANIZATION_ACCOUNT']
+                    session = get_session(account=ORGANIZATION_ACCOUNT, role=ORGANIZATION_ROLE, externalId=ORGANIZATION_ROLE_EXTERNALID, session_name='scoutsuite_lambda')
                     accounts = getAllActiveAccounts(session)
                     print("Found %s accounts to scan." % (len(accounts)))
 
@@ -393,11 +393,11 @@ Resources:
           JOBDEFINITION: !Ref ScoutSuiteJobDefinition
           SCOUTSUITE_SCAN_ROLE: !Ref ScoutSuiteScanRole
           SCOUTSUITE_ROLE_EXTERNALID: !Ref ScoutSuiteScanRoleExternalId
-          ORGANIZATIONS_ROLE: !Ref ScoutSuiteOrganizationsRole
-          ORGANIZATIONS_ROLE_EXTERNALID: !Ref ScoutSuiteOrganizationsRoleExternalId
-          ORGANIZATIONS_ACCOUNT: !Ref ScoutSuiteOrganizationsAccount
+          ORGANIZATION_ROLE: !Ref OrganizationRole
+          ORGANIZATION_ROLE_EXTERNALID: !Ref OrganizationRoleExternalId
+          ORGANIZATION_ACCOUNT: !Ref OrganizationAccount
       MemorySize: 128
-      Role: !Sub ${ScoutSuiteJobLauncherLambdaRole.Arn}
+      Role: !GetAtt ScoutSuiteJobLauncherLambdaRole.Arn
       Runtime: "python3.6"
       Timeout: 60
       Tags:
