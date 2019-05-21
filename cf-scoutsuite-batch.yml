@@ -398,7 +398,7 @@ Resources:
           ORGANIZATION_ACCOUNT: !Ref OrganizationAccount
       MemorySize: 128
       Role: !GetAtt ScoutSuiteJobLauncherLambdaRole.Arn
-      Runtime: "python3.6"
+      Runtime: "python3.7"
       Timeout: 60
       Tags:
       - Key: Block
