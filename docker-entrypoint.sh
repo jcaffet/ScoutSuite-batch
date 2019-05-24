@@ -23,7 +23,7 @@ export AWS_SESSION_TOKEN=`cat ${TMP_ASSUME_ROLE_FILE} | jq -r .Credentials.Sessi
 if [ -z "${AWS_SESSION_TOKEN}" ]; then echo "AWS_SESSION_TOKEN not set !"; exit 1; fi
 
 echo "Generating HTML Account audit ..."
-Scout aws
+scout aws
 
 echo "Saving the report files in s3://${REPORTING_BUCKET}/${ACCOUNT}"
 report_file_prefix=${ACCOUNT}-scoutsuite
