@@ -26,7 +26,7 @@ Parameters:
   ScoutSuiteEcrRepoName:
     Description: ECR name for the ScoutSuite repo
     Type: String
-    Default: prowler
+    Default: scoutsuite
 
   UseOwnReportingBucket:
     Description: Enable a dedicated Bucket to store reports

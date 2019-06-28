@@ -20,6 +20,6 @@ aws --profile=${profile} cloudformation create-stack \
     --template-body file://cf-${APP}-common.yml \
     --parameters ParameterKey=TagBlock,ParameterValue=security \
                  ParameterKey=TagApp,ParameterValue=${APP} \
-                 ParameterKey=TagOrg,ParameterValue=cloudaccelerationteam \
-                 ParameterKey=ScoutSuiteEcrRepoName,ParameterValue=cloudaccelerationteam/${APP}
+                 ParameterKey=TagOrg,ParameterValue=cloudteam \
+                 ParameterKey=ScoutSuiteEcrRepoName,ParameterValue=${APP}
 

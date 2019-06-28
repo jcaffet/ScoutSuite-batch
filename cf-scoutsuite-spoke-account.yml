@@ -11,7 +11,7 @@ Parameters:
     ConstraintDescription: Must be a valid AWS account ID
 
   ScoutSuiteRoleExternalId:
-    Description: CloudSploit Role ExternalID
+    Description: ScoutSuite Role ExternalID
     Type: String
 
 Resources:
