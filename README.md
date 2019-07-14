@@ -6,9 +6,14 @@ ScoutSuite Batch is an AWS account security scanner specialist based on [ScoutSu
 
 People need to audit their account to seek security issues or validate compliance. ScoutSuite Batch is here to do the job for you at a defined frequency.
 It ensures cost containment and security hardening.
-Reports are stored into an S3 Bucket.
 
-## Technicals details
+## Design
+
+### Diagram
+
+![ScoutSuite Batch Diagram](images/scoutsuitebatch-diagram.png)
+
+### Content
 
 ScoutSuite batch simply runs [ScoutSuite](https://github.com/nccgroup/ScoutSuite) into AWS Batch jobs.
 It simply industrializes the deletion process thanks to the following AWS resources :
@@ -19,9 +24,15 @@ It simply industrializes the deletion process thanks to the following AWS resour
 - S3 to store generated reports
 - CloudWatch Logs to log the global activity
 
-![ScoutSuite Batch Diagram](images/scoutsuitebatch-diagram.png)
+### Explanation
 
-## Prerequisites
+The system works around two independent Lambdas :
+- scoutsuite-job-launcher : retrieves all the accounts from AWS Organizations and submit as many AWS Batch jobs as there are accounts.  This Lambda is invoked by a CloudWatch rule but could be invoked manually.
+- scoutsuite-account-harverster : it is in charge of updating the StackSet that spread on all accounts the role used by Batch jobs to scan the accounts. This Lambda is invoked by a CloudWatch rule but could be invoked manually.
+
+## Installation
+
+### Prerequisites
 
 ScoutSuite needs :
 - a VPC
