@@ -38,7 +38,7 @@ ScoutSuite needs :
 - a VPC
 - a private subnet with Internet connection (through a NAT Gateway)
 
-## Installation
+## Steps
 
 1. deploy the [cf-scoutsuite-common.yml](cf-scoutsuite-common.yml) CloudFormation stack in the central account
 2. Git clone scoutsuite scans repository into this directory
