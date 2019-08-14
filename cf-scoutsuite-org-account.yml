@@ -4,7 +4,7 @@ Description: Stack providing cross account access for ScoutSuite
 
 Parameters:
 
-  ScoutSuiteAccount:
+  ScoutSuiteCentralAccount:
     Description: ScoutSuite AWS accountId
     Type: String
     ConstraintDescription: Must be a valid AWS account ID
@@ -20,7 +20,7 @@ Parameters:
 
 Resources:
 
-  ScoutSuiteScanRole:
+  ScoutSuiteOrgRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: scoutsuite-organizations-role
@@ -29,7 +29,7 @@ Resources:
         Statement:
         - Effect: Allow
           Principal:
-            AWS: !Sub 'arn:aws:iam::${ScoutSuiteAccount}:root'
+            AWS: !Sub 'arn:aws:iam::${ScoutSuiteCentralAccount}:root'
           Action:
           - sts:AssumeRole
           Condition:
@@ -48,5 +48,7 @@ Resources:
           Version: "2012-10-17"
           Statement:
           - Effect: "Allow"
-            Action: cloudformation:CreateStackInstances
+            Action:
+            - cloudformation:CreateStackInstances
+            - cloudformation:ListStackInstances
             Resource: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stackset/${ScoutSuiteStackSetSpokeName}:*"
