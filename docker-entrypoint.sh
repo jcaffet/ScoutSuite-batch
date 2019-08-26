@@ -9,7 +9,7 @@ if [ -z "${SCOUTSUITE_ROLE_EXTERNALID}" ]; then echo "SCOUTSUITE_ROLE_EXTERNALID
 
 echo "Collecting credentials for ${ACCOUNT} with role ${SCOUTSUITE_SCAN_ROLE}"
 aws sts assume-role --role-arn arn:aws:iam::${ACCOUNT}:role/${SCOUTSUITE_SCAN_ROLE} \
-										--external-id ${SCOUTSUITE_ROLE_EXTERNALID} \
+                    --external-id ${SCOUTSUITE_ROLE_EXTERNALID} \
                     --role-session-name ${SCOUTSUITE_SCAN_ROLE} \
                     >${TMP_ASSUME_ROLE_FILE}
 
@@ -23,7 +23,10 @@ export AWS_SESSION_TOKEN=`cat ${TMP_ASSUME_ROLE_FILE} | jq -r .Credentials.Sessi
 if [ -z "${AWS_SESSION_TOKEN}" ]; then echo "AWS_SESSION_TOKEN not set !"; exit 1; fi
 
 echo "Generating HTML Account audit ..."
-scout aws
+scout aws --access-keys \
+          --access-key-id ${AWS_ACCESS_KEY_ID} \
+          --secret-access-key ${AWS_SECRET_ACCESS_KEY} \
+          --session-token ${AWS_SESSION_TOKEN}
 
 echo "Saving the report files in s3://${REPORTING_BUCKET}/${ACCOUNT}"
 report_file_prefix=${ACCOUNT}-scoutsuite
