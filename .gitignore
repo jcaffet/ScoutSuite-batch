@@ -1,0 +1,5 @@
+# virtualenv 
+venv/
+
+# reports directory
+scoutsuite-report/
