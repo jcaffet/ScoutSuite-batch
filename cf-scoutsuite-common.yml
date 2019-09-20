@@ -43,7 +43,14 @@ Resources:
   ScoutSuiteEcrRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub '${ScoutSuiteEcrRepoName}'
+      RepositoryName: !Ref ScoutSuiteEcrRepoName
+      Tags:
+      - Key: Block
+        Value: !Ref TagBlock
+      - Key: App
+        Value: !Ref TagApp
+      - Key: Org
+        Value: !Ref TagOrg
 
   ScoutSuiteS3Bucket:
     Type: AWS::S3::Bucket
@@ -56,11 +63,11 @@ Resources:
             SSEAlgorithm: AES256
       Tags:
       - Key: Block
-        Value: !Sub '${TagBlock}'
+        Value: !Ref TagBlock
       - Key: App
-        Value: !Sub '${TagApp}'
+        Value: !Ref TagApp
       - Key: Org
-        Value: !Sub '${TagOrg}'
+        Value: !Ref TagOrg
 
 Outputs:
 
